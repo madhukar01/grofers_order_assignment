@@ -1,7 +1,7 @@
 import asyncio
 from aiohttp import web
-from .routes import setup_routes
-from .startup import setup_modules
+from routes import setup_routes
+from startup import setup_modules
 import uvloop
 
 # Set uvloop as default loop for asyncio
