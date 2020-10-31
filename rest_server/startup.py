@@ -1,3 +1,4 @@
+from libraries import Database
 
 
 ###############################################################################
@@ -5,4 +6,6 @@
 ###############################################################################
 async def setup_modules(app):
     # Initialize modules
-    pass
+    db_module = await Database()
+    app['db'] = db_module.get_database()
+    app['db_connection'] = db_module.get_connection()
