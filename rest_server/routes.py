@@ -1,5 +1,6 @@
 from aiohttp import web
 import aiohttp_cors
+import orders
 
 
 ###############################################################################
@@ -7,7 +8,10 @@ import aiohttp_cors
 ###############################################################################
 def setup_routes(app):
     # Add URL Routes
-    app.add_routes(())
+    app.add_routes((
+        web.view('/order/deliver',
+                 orders.DeliverOrders),
+    ))
 
     #  Enable CORS over all routes
     cors = aiohttp_cors.setup(app, defaults={
