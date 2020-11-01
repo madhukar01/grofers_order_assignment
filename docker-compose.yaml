@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+# ==================================
+# AIOHTTP REST Server
+# ==================================
+  rest_server:
+    image: grofers_order_assignment
+    environment:
+      - PYTHONPATH=/platform
+    working_dir: /platform/rest_server
+    command: python3 -u main.py
+    volumes:
+      - /home/deploy/grofers_order_assignment:/platform
+    container_name: rest_server
+    depends_on:
+      - database
+    network_mode: "host"
+
+# ==================================
+# Database
+# ==================================
+  database:
+    image: rethinkdb
+    container_name: database
+    network_mode: "host"
