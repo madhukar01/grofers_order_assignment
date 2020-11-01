@@ -9,8 +9,10 @@ import orders
 def setup_routes(app):
     # Add URL Routes
     app.add_routes((
-        web.view('/order/deliver',
+        web.view('/api/order/deliver',
                  orders.DeliverOrders),
+        web.view('/api/order/vehicles',
+                 orders.AvailableVehicles)
     ))
 
     #  Enable CORS over all routes
