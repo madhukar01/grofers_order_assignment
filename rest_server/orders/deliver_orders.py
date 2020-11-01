@@ -1,5 +1,6 @@
 from aiohttp import web
 from aiohttp_cors import CorsViewMixin
+from libraries import assign_orders
 import ujson
 
 
@@ -92,3 +93,20 @@ class DeliverOrders(web.View, CorsViewMixin):
                 dumps=ujson.dumps)
 
         # Assign order to vehicles
+        try:
+            delivery_data = assign_orders(
+                vehicles=available_vehicles,
+                orders=orders)
+        except Exception as e:
+            return_data = {
+                'error_message': str(e)
+            }
+            return web.json_response(
+                status=400,
+                data=return_data,
+                dumps=ujson.dumps)
+
+        return web.json_response(
+                status=200,
+                data=delivery_data,
+                dumps=ujson.dumps)
