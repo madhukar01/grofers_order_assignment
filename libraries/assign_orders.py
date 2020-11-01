@@ -1,3 +1,4 @@
+import bisect
 import copy
 
 
@@ -9,11 +10,12 @@ def assign_orders(vehicles, orders):
         raise Exception('No vehicles to deliver orders')
 
     # Data pre processing
-    # Sort orders in decreasing order of weights
-    orders.sort(key=lambda x: x['order_weight'], reverse=True)
+    # Sort orders in increasing order of weights
+    orders.sort(key=lambda x: x['order_weight'])
     order_weights = [x['order_weight'] for x in orders]
 
-    vehicles.sort(key=lambda x: x['max_capacity'], reverse=True)
+    # Sort vehicles in increasing order of max capacity
+    vehicles.sort(key=lambda x: x['max_capacity'])
     available_vehicles = []
     for vehicle in vehicles:
         number_of_vehicles = vehicle.pop('vehicles_available')
@@ -23,8 +25,8 @@ def assign_orders(vehicles, orders):
     vehicle_weights = [x['max_capacity'] for x in available_vehicles]
 
     # Now we have pre-processed the data. Sample below
-    # order_weights = [30, 30, 20, 10]
-    # vehicle_weights = [100, 50, 50, 30, 30, 30]
+    # order_weights = [10, 20, 30, 30]
+    # vehicle_weights = [30, 30, 30, 50, 50, 100]
 
     # Assign order to vehicles
     total_order_weight = sum(order_weights)
@@ -36,49 +38,40 @@ def assign_orders(vehicles, orders):
         raise Exception('Total order weight exceed total vehicle capacity')
 
     while total_order_weight > 0:
-        # Choose vehicle based on total weight
-        vehicle_index = -1
-        for i in range(len(vehicle_weights)):
-            if total_order_weight <= vehicle_weights[i]:
-                vehicle_index = i
-            else:
-                break
+        number_of_vehicles = len(vehicle_weights)
+        if number_of_vehicles == 0:
+            raise Exception('Insufficient vehicles to deliver orders')
 
-        if vehicle_index < 0:
-            vehicle_index = 0
+        # Choose largest available vehicle to accommodate remaining orders
+        vehicle_index = bisect.bisect_left(vehicle_weights, total_order_weight)
+        if vehicle_index == number_of_vehicles:
+            vehicle_index = number_of_vehicles - 1
 
+        # Check if largest remaining order can be delivered in this vehicle
         current_vehicle_weight = vehicle_weights.pop(vehicle_index)
+        if current_vehicle_weight < order_weights[-1]:
+            raise Exception('Unable to deliver orders')
+
         vehicle_chosen = available_vehicles.pop(vehicle_index)
         vehicle_chosen['space_remaining'] = current_vehicle_weight
         vehicle_chosen['oders_assigned'] = []
         delivery_data.append(vehicle_chosen)
 
-        # Fill orders in vehicles that have already been picked
-        order_filled = False
-        for i in range(len(order_weights)):
-            current_order_weight = order_weights[i]
-            if current_order_weight == -1:
-                continue
+        # Fill orders in the chosen vehicle
+        while vehicle_chosen['space_remaining'] > 0:
+            order_index = bisect.bisect_right(
+                order_weights,
+                vehicle_chosen['space_remaining']) - 1
 
-            for delivery in delivery_data:
-                if delivery['space_remaining'] > 0\
-                   and current_order_weight <= delivery['space_remaining']:
-                    delivery['space_remaining'] -= current_order_weight
-                    delivery['oders_assigned'].append(orders[i]['order_id'])
-                    order_weights[i] = -1
-                    order_filled = True
-                    break
+            # Vehicle is full, cannot load any more orders
+            if order_index < 0:
+                break
 
-        # If a new vehicle was picked and order cannot be fulfilled,
-        #   we dont have sufficiently large vehicles
-        if not order_filled:
-            raise Exception('Unable to deliver orders')
+            chosen_order = orders.pop(order_index)
+            order_weights.pop(order_index)
+            vehicle_chosen['space_remaining'] -= chosen_order['order_weight']
+            vehicle_chosen['oders_assigned'].append(chosen_order)
 
-        # Remove filled orders
-        while -1 in order_weights:
-            idx = order_weights.index(-1)
-            order_weights.pop(idx)
-            orders.pop(idx)
         total_order_weight = sum(order_weights)
 
     return delivery_data
@@ -102,11 +95,11 @@ if __name__ == '__main__':
         },
         {
             'order_id': 2,
-            'order_weight': 30
+            'order_weight': 50
         },
         {
             'order_id': 3,
-            'order_weight': 40
+            'order_weight': 15
         }
        ]
 
