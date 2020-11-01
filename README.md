@@ -1,4 +1,4 @@
-# Grofers Ordera Assignment
+# Grofers Orders Assignment
 Assign orders into delivery vehicles based on constraints
 
 ## API Specifications
@@ -41,7 +41,7 @@ Assign orders into delivery vehicles based on constraints
 
 ## Database structure
 - NOSQL Databse with 1 table - to store Delivery vehicle constraints
-- slot_id is document identifier
+- slot_id is the document identifier
 - Example document:
 - ```
     {
@@ -68,10 +68,13 @@ Assign orders into delivery vehicles based on constraints
 - Order are sorted in increasing order of their max capacity
 - Repeat below until all orders are assigned
     - A vehicle is chosen based on the total weight of orders in the given slot
-        - Choose a vehicle large enough to accommodate all orders
+        - Choose a vehicle large enough to accommodate all orders *(using modified binary search)*
         - If no vehicle can accommodate all orders, choose the largest vehicle available
-    - Orders are filled in the chosen vehicle till we cannot accommodate any more orders
-    - If a vehicle is chosen and If we are not able to accommodate the largest order in that vehicle, we cannot deliver orders
+        - If the chosen vehicle cannot accommodate the largest remaining order, We cannot deliver orders
+    - Orders are filled in chosen vehicle
+    - Repeat until we cannot add any item in the remaining space of current vehicle
+        - Choose the largest order that can be filled in the remaining space *(using modified binary search)*
+
 - *P.S - Does not provide best solution always*
 
 
@@ -111,5 +114,5 @@ Assign orders into delivery vehicles based on constraints
     - 50 orders of 1kg weight each
 
 ### Other assumptions for order assignment
-- Maximum of 1 truck, 2 scooters and 3 bikes can be used in a slot (when they are all available)
-- Vehicles will not take trips to deliver orders
+- Maximum of 1 truck, 2 scooters and 3 bikes can be used in a slot *(when they are all available)*
+- Vehicles will not make trips to deliver orders
