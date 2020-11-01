@@ -2,6 +2,12 @@ import copy
 
 
 def assign_orders(vehicles, orders):
+    if len(orders) < 1:
+        raise Exception('No orders to deliver')
+
+    if len(vehicles) < 1:
+        raise Exception('No vehicles to deliver orders')
+
     # Data pre processing
     # Sort orders in decreasing order of weights
     orders.sort(key=lambda x: x['order_weight'], reverse=True)

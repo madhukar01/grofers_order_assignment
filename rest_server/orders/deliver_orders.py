@@ -14,7 +14,7 @@ class DeliverOrders(web.View, CorsViewMixin):
     async def post(self):
         # Decode post data
         try:
-            orders_data = await self.request.post()
+            orders_data = await self.request.json()
         except Exception as e:
             return_data = {
                 'error_message': 'Unable to unpack data'
@@ -23,6 +23,9 @@ class DeliverOrders(web.View, CorsViewMixin):
                 status=400,
                 data=return_data,
                 dumps=ujson.dumps)
+
+        # Log to docker - debug
+        print(orders_data)
 
         try:
             # Validate order data
@@ -95,7 +98,7 @@ class DeliverOrders(web.View, CorsViewMixin):
         # Assign order to vehicles
         try:
             delivery_data = assign_orders(
-                vehicles=available_vehicles,
+                vehicles=available_vehicles['available_vehicles'],
                 orders=orders)
         except Exception as e:
             return_data = {
